@@ -1,5 +1,5 @@
 # bk
-A simple backup utility
+A simple backup utility.
 
 Lets you archive a file or folder
 without the hassle of 
