@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+# NAME 
+# 	bk - Backup utility
+
+# VERSION
+# 	0.1
+
+# AUTHOR 
+# 	Francois "alco" Alcover
+
+# DESCRIPTION 
+# 	Copy/zip a file or folder, adding date to new name.
+
+# SYNOPSIS
+# 	bk [-z] SOURCE
+
+# EXAMPLES
+# 	bk file 	 	-> file_2020-10-24
+# 	bk file.bar  	-> file_2020-10-24.bar
+# 	bk file.bar.tmp -> file_2020-10-24.bar.tmp
+
+# 	bk dir 		 	-> dir_2020-10-24
+# 	bk dir.foo	 	-> dir.foo_2020-10-24
+# 	cd dir; bk . 	-> ../dir_2020-10-24
+
+# 	bk -z file.bar 	-> file_2020-10-24.bar.zip
+
+#=====================================================
+
+# exit on error
+set -e 
+
+DATEFMT='+%Y-%m-%d-%H-%M'
+
+# check `zip` is installed
+if ! [ -x "$(command -v zip)" ]; then
+	echo 'Error: zip is not installed.' >&2
+	exit 1
+fi
+
+# no args, usage
+if [ $# -eq 0 ]; then
+	echo 'USAGE: bk [-z] src[.ext] - copies src to src_{date}[.ext]'
+	exit 1
+fi
+
+compress=false
+if [ $1 == '-z' ]; then
+	compress=true
+	shift
+fi
+
+src=$1
+
+if [ -f "$src" ]; then
+
+	# save extension
+	ext="${src#*.}"
+
+	# remove extension
+	name="${src%%.*}"
+
+	if [ "$name" == "$ext" ]; then
+		ext=''
+	else
+		ext=".$ext"
+	fi
+
+elif [ -d "$src" ]; then
+
+	# backup current dir '.'
+	if [ "$src" == '.' ]; then
+		name="../$(basename $PWD)"
+	else
+		# rm slash
+		src=${src%/}  
+		name="$src"
+	fi
+
+else
+	echo "'$src' is not a file nor a dir."
+	exit 1
+fi
+
+dest="${name}_$(date "$DATEFMT")$ext"
+
+if [ "$compress" = true ]; then
+	dest="$dest.zip"
+	zip -r -q "$dest" "$src"
+else
+	cp -f -r "$src" "$dest"
+fi
+
+echo "saved to $dest"
+exit 0
