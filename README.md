@@ -6,7 +6,7 @@ Lets you archive a file or folder without having to
 - find a name like `foo2` or `foo (copy 1)`  
 - go up the file system to archive current folder
 
-## EXAMPLES
+### EXAMPLES
 
 Basic  
 `$> bk file.py`  
